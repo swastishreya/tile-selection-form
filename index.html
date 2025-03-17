@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tile Selection Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin: 20px;
+        }
+        .container {
+            max-width: 500px;
+            margin: auto;
+        }
+        .tiles {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .tile {
+            width: 60px;
+            height: 60px;
+            background-color: lightgray;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-weight: bold;
+            border: 2px solid gray;
+            user-select: none;
+        }
+        .selected {
+            background-color: green;
+            color: white;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Which options do you choose?</h2>
+        <div class="tiles" id="tiles-container">
+            <!-- Tiles will be generated dynamically -->
+        </div>
+        <button id="submit-btn">Submit</button>
+    </div>
+
+    <script>
+        const tileContainer = document.getElementById('tiles-container');
+        const submitBtn = document.getElementById('submit-btn');
+        let selectedTiles = new Set();
+
+        // Generate 25 tiles dynamically
+        for (let i = 1; i <= 25; i++) {
+            let tile = document.createElement('div');
+            tile.classList.add('tile');
+            tile.textContent = i;
+            tile.dataset.value = i;
+            
+            tile.addEventListener('click', function() {
+                if (selectedTiles.has(i)) {
+                    selectedTiles.delete(i);
+                    tile.classList.remove('selected');
+                } else {
+                    selectedTiles.add(i);
+                    tile.classList.add('selected');
+                }
+            });
+
+            tileContainer.appendChild(tile);
+        }
+
+        // Submit the selected tiles
+        submitBtn.addEventListener('click', function() {
+            if (selectedTiles.size === 0) {
+                alert("Please select at least one tile.");
+                return;
+            }
+
+            // Send data to backend
+            fetch('/submit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ selected: Array.from(selectedTiles) })
+            })
+            .then(response => response.json())
+            .then(data => alert("Response submitted: " + JSON.stringify(data)))
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+
+</body>
+</html>
